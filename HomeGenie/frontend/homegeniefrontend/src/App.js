@@ -22,7 +22,7 @@ const App = () => {
     const newMessage = { message: input };
 
     try {
-      const response = await axios.post('http://localhost:5000/chat', newMessage, {
+      const response = await axios.post('https://homegeniebackend.onrender.com:5000/chat', newMessage, {
         headers: { 'Content-Type': 'application/json' },
       });
 
