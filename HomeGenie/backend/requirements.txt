@@ -3,3 +3,5 @@ Flask-Cors
 OpenAI
 OpenAI
 ChromaDB
+fitz
+PyMuPDF
