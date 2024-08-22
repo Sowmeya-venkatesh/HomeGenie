@@ -80,7 +80,7 @@ def chat():
         return jsonify({'error': 'Message is required'}), 400
 
     pdf_text = extract_text_from_pdf(PDF_PATH)
-    with open('./history.txt', 'w') as file:
+    with open('./history.txt', 'a') as file:
             file.write('User: ' + user_message + '\n')
     
     with open('./history.txt', 'r') as file:
@@ -96,21 +96,22 @@ def chat():
             "content": (
                 "Your name is HomeGenie. You are a helpful assistant here to assist users with issues in their home. "
                 "The information you need to provide is based on the PDF content. Make sure to remove unnecessary quotations, "
-                "asterisks, and other special characters while providing the answer. Provide solutions in points with a newline character. "
+                "asterisks, and other special characters while providing the answer. Also this pdf has two parts, first part is providing inforation like minor fixes solution with Average Repair Cost and replacement time, and the second part is providing Repair Method."
                 "Review the conversation history before answering the user."
             ),
         },
         {
             "role": "assistant",
             "content": (
-                "Please read the provided information carefully and answer the user's questions based on this content. "
+                "Please read the information provided by the user carefully and answer the user's questions based on this pdf content. "
                 f"This is the information needed by you to assist the user:\n{pdf_text}"
+                "Please make sure you collect the user's information like name, email, and phone number before providing a solution. This information must be collected in the following format: 'Name: [name], Email: [email], Phone: [phone number]'."
             ),
         },
         {
-            "role": "system",
+            "role": "assistant",
             "content": (
-                "This is the conversation history. Answer the user considering their past questions and your previous responses. "
+                "This is the conversation history between you (HomeGenie) and user. Answer the user considering their past questions and your previous responses. "
                 f"The user's part is marked as 'user' and your part as 'HomeGenie'. Use the following information to assist the user:\n{content}"
             ),
         },
@@ -121,15 +122,17 @@ def chat():
                 "The information you need to provide is based on the PDF content. Please ensure you provide only the solution based on the user's request. "
                 "If the user greets you, just greet them back without providing any unnecessary information. Remove unnecessary quotations, asterisks, and special characters from your answer."
             ),
+            "context": "The user is asking for help with a home-related issue. Ensure you get their information like name, email, and phone number before providing a solution."
         },
             ]
         )
+        print(content)
         reply = response.choices[0].message.content
-        with open('./history.txt', 'w') as file:
+        with open('./history.txt', 'a') as file:
             file.write('HomeGenie: ' + reply + '\n')
 
         user_info = parse_user_info(user_message)
-        if all(user_info.values()):  # Check if all fields are filled
+        if all(user_info.values()):  
             save_user_info(user_info)
     except Exception as e:
         print(f"Error with OpenAI API call: {e}")
@@ -138,5 +141,4 @@ def chat():
     return jsonify({'reply': reply})
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5000))  # Use the PORT environment variable or default to 5000
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(debug=True)
